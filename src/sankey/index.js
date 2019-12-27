@@ -76,96 +76,97 @@ function Sankey(props) {
     DEFAULT_MARGINS
   );
   const sankeyInstance = sankey()
-    .extent([
-      [marginLeft, marginTop],
-      [width - marginRight, height - marginBottom - marginTop]
-    ])
-    .nodeWidth(nodeWidth)
-    .nodePadding(nodePadding)
-    .nodes(nodesCopy)
-    .links(linksCopy)
-    .nodeAlign(ALIGNMENTS[align])
-    .iterations(layout);
+	.extent([
+	  [marginLeft, marginTop],
+	  [width - marginRight, height - marginBottom - marginTop]
+	])
+	.nodeWidth(nodeWidth)
+	.nodePadding(nodePadding)
+	.nodes(nodesCopy)
+	.nodeId(d => d.id) // allow for strings (JSON)
+	.links(linksCopy)
+	.nodeAlign(ALIGNMENTS[align])
+	.iterations(layout);
   sankeyInstance(nodesCopy);
 
   const nWidth = sankeyInstance.nodeWidth();
   const path = sankeyLinkHorizontal();
 
   return (
-    <XYPlot {...props} yType="literal" className={getCombinedClassName("rv-sankey", className)}>
+      <XYPlot {...props} yType="literal" className={getCombinedClassName("rv-sankey", className)}>
       {linksCopy.map((link, i) => (
-        <SankeyLink
-          style={style.links}
-          data={path(link)}
-          opacity={link.opacity || linkOpacity}
-          color={link.color}
-          onLinkClick={onLinkClick}
-          onLinkMouseOver={onLinkMouseOver}
-          onLinkMouseOut={onLinkMouseOut}
-          strokeWidth={Math.max(link.width, 1)}
-          node={link}
-          nWidth={nWidth}
-          key={`link-${i}`}
-        />
+          <SankeyLink
+        style={style.links}
+        data={path(link)}
+        opacity={link.opacity || linkOpacity}
+        color={link.color}
+        onLinkClick={onLinkClick}
+        onLinkMouseOver={onLinkMouseOver}
+        onLinkMouseOut={onLinkMouseOut}
+        strokeWidth={Math.max(link.width, 1)}
+        node={link}
+        nWidth={nWidth}
+        key={`link-${i}`}
+          />
       ))}
       <VerticalRectSeries
-        animation={animation}
-        className={getCombinedClassName(className, "rv-sankey__node")}
-        data={nodesCopy.map(node => ({
-          ...node,
-          y: node.y1 - marginTop,
-          y0: node.y0 - marginTop,
-          x: node.x1,
-          x0: node.x0,
-          color: node.color || DISCRETE_COLOR_RANGE[0],
-          sourceLinks: null,
-          targetLinks: null
-        }))}
-        style={style.rects}
-        onValueClick={onValueClick}
-        onValueMouseOver={onValueMouseOver}
-        onValueMouseOut={onValueMouseOut}
-        colorType="literal"
+    animation={animation}
+    className={getCombinedClassName(className, "rv-sankey__node")}
+    data={nodesCopy.map(node => ({
+      ...node,
+      y: node.y1 - marginTop,
+      y0: node.y0 - marginTop,
+      x: node.x1,
+      x0: node.x0,
+      color: node.color || DISCRETE_COLOR_RANGE[0],
+      sourceLinks: null,
+      targetLinks: null
+    }))}
+    style={style.rects}
+    onValueClick={onValueClick}
+    onValueMouseOver={onValueMouseOver}
+    onValueMouseOut={onValueMouseOut}
+    colorType="literal"
       />
       {!hideLabels && (
-        <LabelSeries
-          animation={animation}
-          className={className}
-          rotation={labelRotation}
-          labelAnchorY="text-before-edge"
-          data={nodesCopy.map((node, i) => {
-            return {
-              x: node.x0 + (node.x0 < width / 2 ? nWidth + 10 : -10),
-              y: (node.y0 + node.y1) / 2 - marginTop,
-              label: node.name,
-              style: {
-                textAnchor: node.x0 < width / 2 ? 'start' : 'end',
-                dy: '-.5em',
-                ...style.labels
-              },
-              // unfortunately this can not be ...node as the version
-              // found in nodesCopy is modified by the sankey process
-              ...nodes[i]
-            };
-          })}
-        />
+          <LabelSeries
+        animation={animation}
+        className={className}
+        rotation={labelRotation}
+        labelAnchorY="text-before-edge"
+        data={nodesCopy.map((node, i) => {
+          return {
+            x: node.x0 + (node.x0 < width / 2 ? nWidth + 10 : -10),
+            y: (node.y0 + node.y1) / 2 - marginTop,
+            label: node.name,
+            style: {
+              textAnchor: node.x0 < width / 2 ? 'start' : 'end',
+              dy: '-.5em',
+              ...style.labels
+            },
+            // unfortunately this can not be ...node as the version
+            // found in nodesCopy is modified by the sankey process
+            ...nodes[i]
+          };
+        })}
+          />
       )}
-      {hasVoronoi && (
+    {hasVoronoi && (
         <Voronoi
-          className="rv-sankey__voronoi"
-          extent={[
-            [-marginLeft, -marginTop],
-            [width + marginRight, height + marginBottom]
-          ]}
-          nodes={nodesCopy}
-          onClick={onValueClick}
-          onHover={onValueMouseOver}
-          onBlur={onValueMouseOut}
-          x={d => d.x0 + (d.x1 - d.x0) / 2}
-          y={d => d.y0 + (d.y1 - d.y0) / 2}
+      className="rv-sankey__voronoi"
+      extent={[
+        [-marginLeft, -marginTop],
+        [width + marginRight, height + marginBottom]
+      ]}
+      nodes={nodesCopy}
+      onClick={onValueClick}
+      onHover={onValueMouseOver}
+      onBlur={onValueMouseOut}
+      x={d => d.x0 + (d.x1 - d.x0) / 2}
+      y={d => d.y0 + (d.y1 - d.y0) / 2}
         />
-      )}
-      {children}
+    )}
+    {children}
     </XYPlot>
   );
 }
